@@ -29,25 +29,11 @@ if (!JWT_SECRET) {
 
 const PORT = process.env.PORT || 5000;
 
-// Your deployed frontend URL.
-// Example:
-// https://digivault.vercel.app
+// Your deployed frontend URL
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
 // ======================================================
 // UPLOAD DIRECTORY
-// ======================================================
-//
-// Local:
-//   server/uploads
-//
-// Vercel:
-//   /tmp/digivault-uploads
-//
-// IMPORTANT:
-// Vercel's filesystem is temporary. This keeps your existing
-// functionality working, but permanent production document
-// storage should eventually be moved to Blob/S3/etc.
 // ======================================================
 
 const UPLOADS_DIR = process.env.VERCEL
@@ -154,13 +140,6 @@ ET`;
 // ======================================================
 // MULTER CONFIGURATION
 // ======================================================
-//
-// Keeping disk storage for compatibility with your
-// existing dbStore.js.
-//
-// On Vercel the files are written to /tmp.
-// For permanent storage, migrate this to Vercel Blob/S3.
-// ======================================================
 
 const storage = multer.diskStorage({
 
@@ -200,43 +179,73 @@ const upload = multer({
 const app = express();
 
 // ======================================================
-// CORS
+// CORS CONFIGURATION
 // ======================================================
 
 const allowedOrigins = [
+  'https://digi-vault-psi.vercel.app',
   'http://localhost:5173',
   'http://127.0.0.1:5173'
 ];
 
 if (FRONTEND_URL) {
-  allowedOrigins.push(FRONTEND_URL);
+  const normalizedFrontendUrl =
+    FRONTEND_URL.replace(/\/$/, '');
+
+  if (!allowedOrigins.includes(normalizedFrontendUrl)) {
+    allowedOrigins.push(normalizedFrontendUrl);
+  }
 }
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
+const corsOptions = {
+  origin: (origin, callback) => {
 
-      // Allow server-to-server requests / tools
-      if (!origin) {
-        return callback(null, true);
-      }
+    // Allow requests without an Origin header.
+    // Useful for server-to-server requests and health checks.
+    if (!origin) {
+      return callback(null, true);
+    }
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-      return callback(
-        new Error('CORS: Origin not allowed')
-      );
-    },
+    return callback(
+      new Error(
+        `CORS: Origin not allowed: ${origin}`
+      )
+    );
+  },
 
-    credentials: true,
+  methods: [
+    'GET',
+    'POST',
+    'PUT',
+    'DELETE',
+    'OPTIONS'
+  ],
 
-    exposedHeaders: [
-      'Content-Disposition',
-      'Content-Type'
-    ]
-  })
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization'
+  ],
+
+  credentials: true,
+
+  exposedHeaders: [
+    'Content-Disposition',
+    'Content-Type'
+  ],
+
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
+// Explicitly handle browser preflight requests.
+app.options(
+  '*',
+  cors(corsOptions)
 );
 
 // ======================================================
@@ -253,11 +262,6 @@ app.use(
 
 // ======================================================
 // STATIC UPLOAD ACCESS
-// ======================================================
-//
-// This is mainly useful locally.
-// Private document downloads still go through
-// authenticated routes below.
 // ======================================================
 
 app.use(
@@ -1361,22 +1365,8 @@ app.use(
 );
 
 // ======================================================
-// EXPORT APP FOR VERCEL
-// ======================================================
-
-
-
-// ======================================================
 // LOCAL SERVER
 // ======================================================
-//
-// Vercel imports the app and does NOT need app.listen().
-// When running locally, Node starts the server normally.
-// ======================================================
-
-// ==========================================
-// START SERVER
-// ==========================================
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(
