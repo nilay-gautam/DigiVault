@@ -7,8 +7,7 @@
 //
 // Local development:
 // Falls back to '/api', which can be proxied through Vite.
-const API_BASE =
-  import.meta.env.VITE_API_URL || '/api';
+const API_BASE = 'https://digi-vault-backend.vercel.app/api';
 
 
 // ==========================================
