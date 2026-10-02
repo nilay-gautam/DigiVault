@@ -1,5 +1,5 @@
 {
-  "name": "securedoc-server",
+  "name": "digivault-server",
   "version": "1.0.0",
   "description": "SecureDoc MERN Cloud Vault API Server",
   "main": "server.js",
