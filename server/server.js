@@ -1376,16 +1376,12 @@ export default app;
 
 if (!process.env.VERCEL) {
 
-  app.listen(
-    PORT,
-    '0.0.0.0',
-    () => {
+  export default app;
 
-      console.log(
-        `[DigiVault Server] Running on port ${PORT}`
-      );
-
-    }
-  );
+if (!process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[DigiVault Server] Running on port ${PORT}`);
+  });
+}
 
 }
