@@ -1364,7 +1364,7 @@ app.use(
 // EXPORT APP FOR VERCEL
 // ======================================================
 
-export default app;
+
 
 // ======================================================
 // LOCAL SERVER
@@ -1374,14 +1374,12 @@ export default app;
 // When running locally, Node starts the server normally.
 // ======================================================
 
-if (!process.env.VERCEL) {
+// ==========================================
+// START SERVER
+// ==========================================
 
-  export default app;
-
-if (!process.env.VERCEL) {
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[DigiVault Server] Running on port ${PORT}`);
-  });
-}
-
-}
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(
+    `[DigiLocker Server] Running on port ${PORT}`
+  );
+});
